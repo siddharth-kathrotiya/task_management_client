@@ -32,3 +32,13 @@ export const getRecommendedTask = async () => {
     throw error;
   }
 };
+
+export const createNewTask = async (payload) => {
+  try {
+    const response = await postRequest(TASK_ENDPOINT.createTask, payload);
+    return response.data;
+  } catch (error) {
+    console.error("Error on creating task:", error);
+    throw error;
+  }
+};

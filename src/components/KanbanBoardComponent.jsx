@@ -11,6 +11,8 @@ import {
 } from "@mui/material";
 import { getTasks, changeTaskStatus } from "../lib/taskService";
 import Loader from "./Loader";
+import { useDispatch, useSelector } from "react-redux";
+import { toggleStatus } from "../Redux/statusSlice";
 
 export const priorityColors = {
   high: "bg-red-600",
@@ -28,13 +30,15 @@ export const getDeadlineColor = (deadline) => {
   return "text-green-600";
 };
 
-const KanbanBoard = ({ setStatus, status }) => {
+const KanbanBoard = () => {
   const [columns, setColumns] = useState({
     todo: [],
     inProgress: [],
     done: [],
   });
   const [loading, setLoading] = useState(false);
+  const status = useSelector((state) => state.status.status);
+  const dispatch = useDispatch();
 
   const getTasksData = async () => {
     setLoading(true);
@@ -129,7 +133,7 @@ const KanbanBoard = ({ setStatus, status }) => {
       const newStatus = statusMap[destCol];
       setLoading(true);
       await changeTaskStatus({ taskId: draggableId, status: newStatus });
-      setStatus(!status);
+      dispatch(toggleStatus());
       setLoading(false);
     }
   };

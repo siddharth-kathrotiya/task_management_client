@@ -10,10 +10,10 @@ const Dashboard = () => {
   return (
     <div className="flex h-screen">
       <div className="w-4/5 bg-white p-4">
-        <KanbanBoard setStatus={setStatus} status={status} />
+        <KanbanBoard />
       </div>
       <div className="w-1/5 bg-gray-100 p-4">
-        <Sidebar setStatus={setStatus} status={status} />
+        <Sidebar />
       </div>
     </div>
   );

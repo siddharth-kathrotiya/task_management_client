@@ -3,15 +3,20 @@ import { Card, CardContent, Typography, Chip, Button } from "@mui/material";
 import { getDeadlineColor } from "./KanbanBoardComponent"; // reuse your existing functions
 import { changeTaskStatus, getRecommendedTask } from "../lib/taskService";
 import Loader from "./Loader";
+import { useDispatch, useSelector } from "react-redux";
+import { toggleStatus } from "../Redux/statusSlice";
 
-const Sidebar = ({ setStatus, status }) => {
+const Sidebar = () => {
   const [loading, setLoading] = useState(false);
   const [recommendedTask, setRecommendedTask] = useState([]);
+
+  const status = useSelector((state) => state.status.status);
+  const dispatch = useDispatch();
 
   const onStartTask = async (taskId) => {
     setLoading(true);
     await changeTaskStatus({ taskId, status: "in-progress" });
-    setStatus(!status);
+    dispatch(toggleStatus());
     setLoading(false);
   };
 

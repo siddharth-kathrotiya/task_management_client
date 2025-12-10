@@ -1,28 +1,57 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Button, TextField, MenuItem, Autocomplete, Box } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
+import { createNewTask, getTasks } from "../lib/taskService";
+import Loader from "./Loader";
+import { useDispatch } from "react-redux";
+
+const taskSchemaValidation = Yup.object().shape({
+  title: Yup.string().required("Title is required"),
+  priority: Yup.number()
+    .min(1, "Priority must be at least 1")
+    .max(5, "Priority cannot exceed 5")
+    .required("Priority is required"),
+  dependencies: Yup.array(),
+  deadline: Yup.date().required("Deadline is required").nullable(),
+  estimatedTime: Yup.number()
+    .min(0, "Estimated time must be positive")
+    .required("Estimated time is required"),
+  status: Yup.string()
+    .oneOf(["pending", "in-progress", "completed"])
+    .required(),
+  tags: Yup.array(),
+});
 
 const NewTaskFormComponent = ({ setOpenForm }) => {
-  const taskSchemaValidation = Yup.object().shape({
-    title: Yup.string().required("Title is required"),
-    priority: Yup.number()
-      .min(1, "Priority must be at least 1")
-      .max(5, "Priority cannot exceed 5")
-      .required("Priority is required"),
-    dependencies: Yup.array(),
-    deadline: Yup.date().required("Deadline is required").nullable(),
-    estimatedTime: Yup.number()
-      .min(0, "Estimated time must be positive")
-      .required("Estimated time is required"),
-    status: Yup.string()
-      .oneOf(["pending", "in-progress", "completed"])
-      .required(),
-    tags: Yup.array(),
-  });
+  const [tasks, setTasks] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
+  const dispatch = useDispatch();
+
+  const getTasksData = async () => {
+    setLoading(true);
+    try {
+      const response = await getTasks();
+      if (response) {
+        setTasks(response.data);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getTasksData();
+  }, []);
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <div>
@@ -38,8 +67,19 @@ const NewTaskFormComponent = ({ setOpenForm }) => {
             tags: [],
           }}
           validationSchema={taskSchemaValidation}
-          onSubmit={(values) => {
-            console.log(":: New Task >>", values);
+          onSubmit={async (values) => {
+            const payload = {
+              ...values,
+            };
+            try {
+              setLoading(true);
+              await createNewTask(payload);
+              dispatch(toggleStatus());
+            } catch (error) {
+              console.log(error);
+            } finally {
+              setLoading(false);
+            }
             setOpenForm(false);
           }}
         >
@@ -74,7 +114,7 @@ const NewTaskFormComponent = ({ setOpenForm }) => {
               <div>
                 <Autocomplete
                   multiple
-                  options={[{ id: "1", title: "Task 1" }]}
+                  options={tasks}
                   getOptionLabel={(option) => option.title}
                   value={values.dependencies}
                   onChange={(event, value) =>
