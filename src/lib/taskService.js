@@ -22,3 +22,13 @@ export const changeTaskStatus = async ({ taskId, status }) => {
     throw error;
   }
 };
+
+export const getRecommendedTask = async () => {
+  try {
+    const response = await get(TASK_ENDPOINT.recommendedTask);
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching suggested tasks:", error);
+    throw error;
+  }
+};

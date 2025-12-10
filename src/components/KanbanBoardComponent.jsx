@@ -28,7 +28,7 @@ export const getDeadlineColor = (deadline) => {
   return "text-green-600";
 };
 
-const KanbanBoard = () => {
+const KanbanBoard = ({ setStatus, status }) => {
   const [columns, setColumns] = useState({
     todo: [],
     inProgress: [],
@@ -71,7 +71,7 @@ const KanbanBoard = () => {
 
   useEffect(() => {
     getTasksData();
-  }, []);
+  }, [status]);
 
   const [filters, setFilters] = useState({
     priority: "",
@@ -129,6 +129,7 @@ const KanbanBoard = () => {
       const newStatus = statusMap[destCol];
       setLoading(true);
       await changeTaskStatus({ taskId: draggableId, status: newStatus });
+      setStatus(!status);
       setLoading(false);
     }
   };
